@@ -44,7 +44,7 @@ The application uses three different trained models:
 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/PVSCAN.git
-cd SPICE.AI
+cd PVSCAN
 ```
 
 2. Install dependencies
