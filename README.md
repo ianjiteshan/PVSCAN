@@ -1,15 +1,15 @@
 # SPICE.AI
 ## Solar Panel Inspection & Classification Engine
 
-![SPICE.AI Logo](https://github.com/kushalgupta1203/SPICE.AI/blob/main/deployment/logo_phone.png?raw=true)
+![SPICE.AI Logo](https://github.com/ianjiteshan/PVSCAN/blob/main/deployment/logo_phone.png?raw=true)
 
 ## Live Demo
 
-https://spice-ai.streamlit.app/
+{}
 
 ## Overview
 
-SPICE.AI (Solar Panel Inspection & Classification Engine) is an AI-powered application designed to automate the inspection and classification of solar panel conditions. Using advanced computer vision and deep learning techniques, the system can detect various issues like physical damage, electrical damage, snow coverage, water obstruction, foreign particle contamination, and bird interference that may affect solar panel performance.
+PVSCAN(Photovoltaic Visual Scanner & Condition Analysis Network) is an AI-powered application designed to automate the inspection and classification of solar panel conditions. Using advanced computer vision and deep learning techniques, the system can detect various issues like physical damage, electrical damage, snow coverage, water obstruction, foreign particle contamination, and bird interference that may affect solar panel performance.
 
 ## Features
 
@@ -43,7 +43,7 @@ The application uses three different trained models:
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/SPICE.AI.git
+git clone https://github.com/yourusername/PVSCAN.git
 cd SPICE.AI
 ```
 
