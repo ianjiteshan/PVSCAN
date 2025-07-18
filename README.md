@@ -1,7 +1,7 @@
-# SPICE.AI
-## Solar Panel Inspection & Classification Engine
+# PVSCAN
+## Photovoltaic Visual Scanner & Condition Analysis Network
 
-![SPICE.AI Logo](https://github.com/ianjiteshan/PVSCAN/blob/main/deployment/logo_phone.png?raw=true)
+![SPICE.AI Logo](https://github.com/ianjiteshan/PVSCAN/blob/main/deployment/logo_comp.png?raw=true)
 
 ## Live Demo
 
