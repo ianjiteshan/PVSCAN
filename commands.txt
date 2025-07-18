@@ -1,0 +1,25 @@
+# Activate Virtual Environment
+
+venv\Scripts\activate
+
+# Install Required Libraries
+pip install requirements.txt
+
+# Step 1: Merge dataset
+python dataset/merge.py
+
+# Step 2: Split dataset
+python dataset/split.py
+
+# Step 3: Train model
+python train/train_v1.1.py
+python train/train_v2.0.py
+
+# Step 4: Test model
+python testing/test.py
+
+# Step 5: Deploy model
+streamlit run deployment/local.py
+streamlit run deployment/single.py
+streamlit run deployment/batch.py
+streamlit run deployment/app.py

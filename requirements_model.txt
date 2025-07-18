@@ -1,0 +1,16 @@
+tensorflow
+pandas
+keras
+numpy
+opencv-python
+matplotlib
+pillow
+pillow-simd
+scipy
+scikit-learn
+streamlit
+albumentations
+tqdm
+torch
+torchvision
+torchaudio
