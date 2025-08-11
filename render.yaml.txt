@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: pvscan-app
+    env: python
+    buildCommand: |
+      echo "--- Building Vue.js Frontend ---"
+      cd pvscan-frontend && npm install && npm run build
+      echo "--- Copying Frontend to Backend Static Folder ---"
+      mkdir -p ../pvscan_backend/src/static
+      cp -r dist/* ../pvscan_backend/src/static/
+      echo "--- Installing Python Backend Dependencies ---"
+      cd ../pvscan_backend && pip install -r requirements.txt
+    startCommand: cd pvscan_backend && gunicorn --bind 0.0.0.0:$PORT src.main:app
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: false
+      - key: VUE_APP_API_BASE_URL # change to VITE_API_BASE_URL if Vite
+        value: https://pvscan-app.onrender.com
+    plan: free
+    healthCheckPath: /api/health
