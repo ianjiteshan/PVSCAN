@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const API_BASE = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000'
+const API_BASE = process.env.NODE_ENV === 'production'
+  ? process.env.VUE_APP_API_BASE_URL
+  : 'http://localhost:5000'
 
+  
 export const useAnalysisStore = defineStore('analysis', {
   state: () => ({
     isLoading: false,
@@ -10,7 +13,7 @@ export const useAnalysisStore = defineStore('analysis', {
     singleResult: null,
     batchResults: null,
     efficiencyMetrics: null,
-    uploadProgress: 0
+    uploadProgress: 0 
   }),
 
   getters: {
