@@ -135,7 +135,12 @@ class PanelAnalysisModel:
         """Load the PyTorch models"""
         try:
             # Load v2.0 model
+            import os
+            print("DEBUG: model_dir is:", self.model_dir)
+
             v20_path = os.path.join(self.model_dir, "pvscan_mobilenetv3_v2.0.pth")
+            print("DEBUG: Looking for model in:", v20_path)
+            print("DEBUG: Exists?", os.path.exists(v20_path))
             if os.path.exists(v20_path):
                 self.models['v2.0'] = self._load_single_model(v20_path)
                 logger.info("Loaded model v2.0")
