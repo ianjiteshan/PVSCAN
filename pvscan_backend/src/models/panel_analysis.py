@@ -111,49 +111,89 @@ class PanelAnalysisModel:
                        (90, 92, -0.211), (92, 94, -0.222), (94, 96, -0.233), (96, 98, -0.244), (98, 100, -0.255), (100, 101, -0.266)]
         }
     }
+
+    # In the __init__ method
+def __init__(self):
+    """Initialize the panel analysis model"""
+    self.script_dir = os.path.dirname(os.path.abspath(__file__))
+    self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    self.models = {}
     
-    def __init__(self, model_dir: str):
-        """
-        Initialize the panel analysis model
-        
-        Args:
-            model_dir: Directory containing the model files
-        """
-        self.model_dir = model_dir
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.models = {}
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-        
-        # Load models
-        self._load_models()
+    # Ensure this transform definition is here
+    self.transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
     
+    self._load_models()
+    
+    
+    # def __init__(self, model_dir: str):
+    #     """
+    #     Initialize the panel analysis model
+        
+    #     Args:
+    #         model_dir: Directory containing the model files
+    #     """
+    #     self.model_dir = model_dir
+    #     self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     self.models = {}
+    #     self.transform = transforms.Compose([
+    #         transforms.Resize((224, 224)),
+    #         transforms.ToTensor(),
+    #         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    #     ])
+        
+    #     # Load models
+    #     self._load_models()
     def _load_models(self):
-        """Load the PyTorch models"""
+        """Load the PyTorch models from the script's directory."""
         try:
             # Load v2.0 model
-            import os
-            print("DEBUG: model_dir is:", self.model_dir)
+            v20_path = os.path.join(self.script_dir, "pvscan_mobilenetv3_v2.0.pth")
+            print(f"DEBUG: Looking for model in: {v20_path}")
 
-            v20_path = os.path.join(self.model_dir, "pvscan_mobilenetv3_v2.0.pth")
-            print("DEBUG: Looking for model in:", v20_path)
-            print("DEBUG: Exists?", os.path.exists(v20_path))
             if os.path.exists(v20_path):
                 self.models['v2.0'] = self._load_single_model(v20_path)
                 logger.info("Loaded model v2.0")
-            
+            else:
+                logger.warning("Model v2.0 not found.")
+
             # Load v1.1 model
-            v11_path = os.path.join(self.model_dir, "pvscan_mobilenetv3_v1.1.pth")
+            v11_path = os.path.join(self.script_dir, "pvscan_mobilenetv3_v1.1.pth")
             if os.path.exists(v11_path):
                 self.models['v1.1'] = self._load_single_model(v11_path)
                 logger.info("Loaded model v1.1")
+            else:
+                logger.warning("Model v1.1 not found.")
                 
         except Exception as e:
             logger.error(f"Error loading models: {e}")
             raise
+    # def _load_models(self):
+    #     """Load the PyTorch models"""
+    #     try:
+    #         # Load v2.0 model
+    #         import os
+    #         print("DEBUG: model_dir is:", self.model_dir)
+
+    #         v20_path = os.path.join(self.model_dir, "pvscan_mobilenetv3_v2.0.pth")
+    #         print("DEBUG: Looking for model in:", v20_path)
+    #         print("DEBUG: Exists?", os.path.exists(v20_path))
+    #         if os.path.exists(v20_path):
+    #             self.models['v2.0'] = self._load_single_model(v20_path)
+    #             logger.info("Loaded model v2.0")
+            
+    #         # Load v1.1 model
+    #         v11_path = os.path.join(self.model_dir, "pvscan_mobilenetv3_v1.1.pth")
+    #         if os.path.exists(v11_path):
+    #             self.models['v1.1'] = self._load_single_model(v11_path)
+    #             logger.info("Loaded model v1.1")
+                
+    #     except Exception as e:
+    #         logger.error(f"Error loading models: {e}")
+    #         raise
     
     def _load_single_model(self, model_path: str):
         """Load a single PyTorch model"""
