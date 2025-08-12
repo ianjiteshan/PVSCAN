@@ -1,12 +1,18 @@
 services:
   - type: web
     name: pvscan-app
-    env: python
+    env: python  
     buildCommand: |
       echo "--- Building Vue.js Frontend ---"
       cd pvscan-frontend && npm install && npm run build
+      echo "--- Copying Frontend to Backend Static Folder ---"
+      cp -r dist/* ../pvscan_backend/src/static/
+      echo "--- Copying AI Models to Backend Static Folder ---"
+      cp ../pvscan_backend/pvscan_mobilenetv3_v1.1.pth ../pvscan_backend/src/static/
+      cp ../pvscan_backend/pvscan_mobilenetv3_v2.0.pth ../pvscan_backend/src/static/
       echo "--- Installing Python Backend Dependencies ---"
       cd ../pvscan_backend && pip install -r requirements.txt
+      
     startCommand: cd pvscan_backend && gunicorn --bind 0.0.0.0:$PORT src.main:app
     envVars:
       - key: FLASK_ENV
