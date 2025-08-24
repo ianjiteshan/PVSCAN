@@ -113,40 +113,21 @@ class PanelAnalysisModel:
     }
 
     # In the __init__ method
-def __init__(self):
-    """Initialize the panel analysis model"""
-    self.script_dir = os.path.dirname(os.path.abspath(__file__))
-    self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    self.models = {}
-    
-    # Ensure this transform definition is here
-    self.transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    
-    self._load_models()
-    
-    
-    # def __init__(self, model_dir: str):
-    #     """
-    #     Initialize the panel analysis model
+    def __init__(self):
+        """Initialize the panel analysis model"""
+        self.script_dir = os.path.dirname(os.path.abspath(__file__))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.models = {}
         
-    #     Args:
-    #         model_dir: Directory containing the model files
-    #     """
-    #     self.model_dir = model_dir
-    #     self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #     self.models = {}
-    #     self.transform = transforms.Compose([
-    #         transforms.Resize((224, 224)),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    #     ])
+        # Ensure this transform definition is here
+        self.transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
         
-    #     # Load models
-    #     self._load_models()
+        self._load_models()
+
     def _load_models(self):
         """Load the PyTorch models from the script's directory."""
         try:
@@ -155,7 +136,7 @@ def __init__(self):
             print(f"DEBUG: Looking for model in: {v20_path}")
 
             if os.path.exists(v20_path):
-                self.models['v2.0'] = self._load_single_model(v20_path)
+                self.models["v2.0"] = self._load_single_model(v20_path)
                 logger.info("Loaded model v2.0")
             else:
                 logger.warning("Model v2.0 not found.")
@@ -163,7 +144,7 @@ def __init__(self):
             # Load v1.1 model
             v11_path = os.path.join(self.script_dir, "pvscan_mobilenetv3_v1.1.pth")
             if os.path.exists(v11_path):
-                self.models['v1.1'] = self._load_single_model(v11_path)
+                self.models["v1.1"] = self._load_single_model(v11_path)
                 logger.info("Loaded model v1.1")
             else:
                 logger.warning("Model v1.1 not found.")
@@ -347,53 +328,382 @@ def __init__(self):
         else:
             return "CRITICAL"
     
-    def _generate_suggestions(self, predictions: Dict[str, float]) -> List[str]:
-        """Generate maintenance suggestions based on predictions"""
+    def _generate_suggestions(self, predictions: Dict[str, float]) -> Dict:
+        """Generate detailed maintenance suggestions with efficiency loss and fixes"""
         suggestions = []
+        efficiency_loss = 0.0
+        priority_level = "LOW"
         
         clean_panel = predictions.get("Clean Panel", 0)
         physical_damage = predictions.get("Physical Damage", 0)
         electrical_damage = predictions.get("Electrical Damage", 0)
-        
-        # Clean panel check
-        if clean_panel > 90 and physical_damage < 10 and electrical_damage < 10:
-            return ["No cleaning required. Panel is in excellent condition."]
-        
-        if clean_panel < 70:
-            suggestions.append(f"Cleaning required (Score: {clean_panel:.1f}%). Dirt accumulation may impact efficiency.")
-        
-        # Physical Damage
-        if physical_damage > 70:
-            suggestions.append(f"Critical physical damage ({physical_damage:.1f}%)! Immediate repair required.")
-        elif physical_damage > 30:
-            suggestions.append(f"High physical damage ({physical_damage:.1f}%). Repair strongly recommended.")
-        elif physical_damage > 10:
-            suggestions.append(f"Moderate physical damage ({physical_damage:.1f}%). Schedule maintenance soon.")
-        
-        # Electrical Damage
-        if electrical_damage > 80:
-            suggestions.append(f"Critical electrical damage ({electrical_damage:.1f}%)! Immediate expert consultation required.")
-        elif electrical_damage > 50:
-            suggestions.append(f"Severe electrical issue ({electrical_damage:.1f}%). Urgent inspection required.")
-        elif electrical_damage > 30:
-            suggestions.append(f"High electrical damage ({electrical_damage:.1f}%). Troubleshooting required soon.")
-        
-        # Other conditions
         snow = predictions.get("Snow Covered", 0)
-        if snow > 50:
-            suggestions.append(f"Panel covered with snow ({snow:.1f}%)! Removal needed.")
-        
         water = predictions.get("Water Obstruction", 0)
-        if water > 60:
-            suggestions.append(f"Heavy water accumulation ({water:.1f}%). Cleaning recommended urgently.")
-        
         contamination = predictions.get("Foreign Particle Contamination", 0)
-        if contamination > 60:
-            suggestions.append(f"Heavy foreign particle accumulation ({contamination:.1f}%). Clean the panel soon.")
-        
         birds = predictions.get("Bird Interference", 0)
-        if birds > 70:
-            suggestions.append(f"Severe bird interference ({birds:.1f}%)! Install deterrents immediately.")
         
-        return suggestions or ["No major issues detected. Panel appears to be in reasonable condition."]
+        # Clean panel analysis
+        if clean_panel > 90 and physical_damage < 10 and electrical_damage < 10:
+            suggestions.append({
+                "issue": "Panel Condition",
+                "severity": "EXCELLENT",
+                "description": "Panel is in excellent condition with minimal issues detected.",
+                "efficiency_loss": "0-2%",
+                "estimated_loss_kwh": "0-50 kWh/year",
+                "fix_recommendations": [
+                    "Continue regular monitoring",
+                    "Schedule routine inspection every 6 months",
+                    "Maintain current cleaning schedule"
+                ],
+                "fix_cost": "$0-50",
+                "fix_time": "No immediate action needed",
+                "priority": "LOW"
+            })
+        else:
+            # Dirt/Cleaning Issues
+            if clean_panel < 70:
+                loss_percent = self._calculate_dirt_efficiency_loss(clean_panel)
+                efficiency_loss += loss_percent
+                priority_level = "MEDIUM" if clean_panel < 50 else "LOW"
+                
+                suggestions.append({
+                    "issue": "Dirt Accumulation",
+                    "severity": "HIGH" if clean_panel < 50 else "MEDIUM",
+                    "description": f"Panel cleanliness score is {clean_panel:.1f}%. Dirt and debris are reducing energy output.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Clean panel surface with soft brush and distilled water",
+                        "Remove bird droppings, leaves, and debris",
+                        "Check for stubborn stains requiring specialized cleaning",
+                        "Establish regular cleaning schedule (monthly in dusty areas)"
+                    ],
+                    "fix_cost": "$50-150",
+                    "fix_time": "1-2 hours",
+                    "priority": "HIGH" if clean_panel < 50 else "MEDIUM"
+                })
+
+            # Physical Damage Analysis
+            if physical_damage > 10:
+                loss_percent = self._calculate_physical_damage_loss(physical_damage)
+                efficiency_loss += loss_percent
+                if physical_damage > 50:
+                    priority_level = "CRITICAL"
+                elif physical_damage > 30:
+                    priority_level = "HIGH"
+                
+                suggestions.append({
+                    "issue": "Physical Damage",
+                    "severity": "CRITICAL" if physical_damage > 70 else "HIGH" if physical_damage > 30 else "MEDIUM",
+                    "description": f"Physical damage detected ({physical_damage:.1f}%). This may include cracks, chips, or surface damage.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Inspect for micro-cracks and cell damage",
+                        "Check frame integrity and mounting system",
+                        "Replace damaged cells if possible",
+                        "Consider panel replacement if damage is extensive",
+                        "Ensure proper drainage to prevent water damage"
+                    ],
+                    "fix_cost": "$200-800" if physical_damage < 50 else "$500-2000",
+                    "fix_time": "2-8 hours" if physical_damage < 50 else "1-2 days",
+                    "priority": "CRITICAL" if physical_damage > 70 else "HIGH"
+                })
+
+            # Electrical Damage Analysis
+            if electrical_damage > 10:
+                loss_percent = self._calculate_electrical_damage_loss(electrical_damage)
+                efficiency_loss += loss_percent
+                if electrical_damage > 50:
+                    priority_level = "CRITICAL"
+                elif electrical_damage > 30:
+                    priority_level = "HIGH"
+                
+                suggestions.append({
+                    "issue": "Electrical Issues",
+                    "severity": "CRITICAL" if electrical_damage > 80 else "HIGH" if electrical_damage > 50 else "MEDIUM",
+                    "description": f"Electrical problems detected ({electrical_damage:.1f}%). This may affect power output and safety.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Check all electrical connections and junction boxes",
+                        "Test voltage and current output",
+                        "Inspect for corrosion or loose connections",
+                        "Verify grounding system integrity",
+                        "Consider professional electrical inspection"
+                    ],
+                    "fix_cost": "$150-500" if electrical_damage < 50 else "$300-1200",
+                    "fix_time": "2-4 hours" if electrical_damage < 50 else "4-8 hours",
+                    "priority": "CRITICAL" if electrical_damage > 80 else "HIGH"
+                })
+
+            # Snow Coverage
+            if snow > 30:
+                loss_percent = min(snow * 0.8, 95)  # Snow can block up to 95% efficiency
+                efficiency_loss += loss_percent
+                priority_level = "HIGH" if snow > 70 else "MEDIUM"
+                
+                suggestions.append({
+                    "issue": "Snow Coverage",
+                    "severity": "HIGH" if snow > 70 else "MEDIUM",
+                    "description": f"Panel is {snow:.1f}% covered with snow, blocking sunlight.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Safely remove snow using soft brush or squeegee",
+                        "Allow natural melting if accessible removal is dangerous",
+                        "Install heating elements for automatic snow removal",
+                        "Adjust panel angle to promote snow sliding"
+                    ],
+                    "fix_cost": "$0-50" if snow < 70 else "$200-800",
+                    "fix_time": "30 minutes - 1 hour",
+                    "priority": "HIGH" if snow > 70 else "MEDIUM"
+                })
+
+            # Water Obstruction
+            if water > 30:
+                loss_percent = min(water * 0.6, 80)  # Water can reduce efficiency significantly
+                efficiency_loss += loss_percent
+                priority_level = "HIGH" if water > 60 else "MEDIUM"
+                
+                suggestions.append({
+                    "issue": "Water Obstruction",
+                    "severity": "HIGH" if water > 60 else "MEDIUM",
+                    "description": f"Water accumulation detected ({water:.1f}%). Standing water reduces light transmission.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Remove standing water immediately",
+                        "Check and clear drainage systems",
+                        "Inspect for proper panel tilt angle",
+                        "Ensure mounting system allows proper water runoff",
+                        "Consider installing better drainage solutions"
+                    ],
+                    "fix_cost": "$50-200",
+                    "fix_time": "1-3 hours",
+                    "priority": "HIGH" if water > 60 else "MEDIUM"
+                })
+
+            # Foreign Particle Contamination
+            if contamination > 30:
+                loss_percent = min(contamination * 0.4, 60)  # Contamination can reduce efficiency
+                efficiency_loss += loss_percent
+                priority_level = "MEDIUM" if contamination > 60 else "LOW"
+                
+                suggestions.append({
+                    "issue": "Foreign Particle Contamination",
+                    "severity": "MEDIUM" if contamination > 60 else "LOW",
+                    "description": f"Foreign particles detected ({contamination:.1f}%). Dust, pollen, or other particles are present.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Clean panel with appropriate cleaning solution",
+                        "Use anti-static cleaning products to reduce particle attraction",
+                        "Install air filtration systems in dusty environments",
+                        "Increase cleaning frequency during high-pollen seasons"
+                    ],
+                    "fix_cost": "$30-100",
+                    "fix_time": "1-2 hours",
+                    "priority": "MEDIUM" if contamination > 60 else "LOW"
+                })
+
+            # Bird Interference
+            if birds > 30:
+                loss_percent = min(birds * 0.5, 70)  # Bird interference can significantly impact efficiency
+                efficiency_loss += loss_percent
+                priority_level = "HIGH" if birds > 70 else "MEDIUM"
+                
+                suggestions.append({
+                    "issue": "Bird Interference",
+                    "severity": "HIGH" if birds > 70 else "MEDIUM",
+                    "description": f"Bird interference detected ({birds:.1f}%). Nesting, droppings, or perching affecting performance.",
+                    "efficiency_loss": f"{loss_percent:.1f}%",
+                    "estimated_loss_kwh": f"{loss_percent * 25:.0f}-{loss_percent * 35:.0f} kWh/year",
+                    "fix_recommendations": [
+                        "Install bird deterrent systems (spikes, nets, or wire mesh)",
+                        "Clean bird droppings regularly",
+                        "Remove any nesting materials safely",
+                        "Consider ultrasonic bird repellers",
+                        "Install physical barriers around panel edges"
+                    ],
+                    "fix_cost": "$100-400",
+                    "fix_time": "2-4 hours",
+                    "priority": "HIGH" if birds > 70 else "MEDIUM"
+                })
+
+        # Cap total efficiency loss at 95%
+        total_efficiency_loss = min(efficiency_loss, 95.0)
+        
+        return {
+            "suggestions": suggestions if suggestions else [{
+                "issue": "Panel Condition",
+                "severity": "GOOD",
+                "description": "No major issues detected. Panel appears to be in reasonable condition.",
+                "efficiency_loss": "0-5%",
+                "estimated_loss_kwh": "0-125 kWh/year",
+                "fix_recommendations": ["Continue regular monitoring and maintenance"],
+                "fix_cost": "$0-50",
+                "fix_time": "No immediate action needed",
+                "priority": "LOW"
+            }],
+            "total_efficiency_loss": f"{total_efficiency_loss:.1f}%",
+            "estimated_annual_cost_loss": f"${total_efficiency_loss * 3:.0f}-{total_efficiency_loss * 5:.0f}",
+            "estimated_annual_loss_kwh": f"{total_efficiency_loss * 25:.0f}-{total_efficiency_loss * 35:.0f} kWh",
+            "overall_priority": priority_level,
+            "maintenance_urgency": self._get_maintenance_urgency(priority_level),
+            "next_inspection": self._get_next_inspection_date(priority_level)
+        }
+    
+    def _calculate_dirt_efficiency_loss(self, clean_score: float) -> float:
+        """Calculate efficiency loss due to dirt accumulation"""
+        if clean_score >= 90:
+            return 0.0
+        elif clean_score >= 80:
+            return 2.0
+        elif clean_score >= 70:
+            return 5.0
+        elif clean_score >= 60:
+            return 8.0
+        elif clean_score >= 50:
+            return 12.0
+        elif clean_score >= 40:
+            return 18.0
+        else:
+            return 25.0
+    
+    def _calculate_physical_damage_loss(self, damage_score: float) -> float:
+        """Calculate efficiency loss due to physical damage"""
+        if damage_score <= 10:
+            return 0.0
+        elif damage_score <= 20:
+            return 3.0
+        elif damage_score <= 30:
+            return 8.0
+        elif damage_score <= 50:
+            return 15.0
+        elif damage_score <= 70:
+            return 25.0
+        else:
+            return 40.0
+    
+    def _calculate_electrical_damage_loss(self, electrical_score: float) -> float:
+        """Calculate efficiency loss due to electrical issues"""
+        if electrical_score <= 10:
+            return 0.0
+        elif electrical_score <= 20:
+            return 5.0
+        elif electrical_score <= 30:
+            return 12.0
+        elif electrical_score <= 50:
+            return 20.0
+        elif electrical_score <= 70:
+            return 35.0
+        else:
+            return 50.0
+    
+    def _get_maintenance_urgency(self, priority: str) -> str:
+        """Get maintenance urgency description"""
+        urgency_map = {
+            "CRITICAL": "Immediate action required within 24-48 hours",
+            "HIGH": "Action required within 1-2 weeks",
+            "MEDIUM": "Action recommended within 1-2 months",
+            "LOW": "Monitor and address during next scheduled maintenance"
+        }
+        return urgency_map.get(priority, "Monitor regularly")
+    
+    def _get_next_inspection_date(self, priority: str) -> str:
+        """Get recommended next inspection timeframe"""
+        inspection_map = {
+            "CRITICAL": "1-2 weeks after repairs",
+            "HIGH": "1 month after repairs",
+            "MEDIUM": "3 months",
+            "LOW": "6 months"
+        }
+        return inspection_map.get(priority, "6 months")
+
+
+
+    def analyze_image(self, image: Image.Image) -> Dict:
+        """
+        Complete analysis of a solar panel image
+        
+        Args:
+            image: PIL Image object
+            
+        Returns:
+            Dictionary containing predictions, total score, and suggestions
+        """
+        try:
+            # Preprocess image
+            image_tensor = self.preprocess_image(image)
+            
+            # Get predictions from both models
+            predictions_v20 = self.predict(image_tensor, 'v2.0')
+            predictions_v11 = self.predict(image_tensor, 'v1.1')
+            
+            # Check panel detection threshold
+            panel_detected_score = predictions_v20.get("Panel Detected", 0)
+            if panel_detected_score < 50:
+                return {
+                    "success": False,
+                    "error": f"Panel detection score ({panel_detected_score:.1f}%) below threshold (50%)",
+                    "panel_detected": False
+                }
+            
+            # Ensemble predictions
+            final_predictions = self._ensemble_predictions(predictions_v11, predictions_v20)
+            
+            # Calculate total score
+            total_score = self._calculate_total_score(final_predictions)
+            
+            # Generate suggestions
+            suggestions = self._generate_suggestions(final_predictions)
+            
+            return {
+                "success": True,
+                "panel_detected": True,
+                "predictions": final_predictions,
+                "total_score": round(total_score, 1),
+                "condition": self._get_condition_label(total_score),
+                "suggestions": suggestions
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing image: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "panel_detected": False
+            }
+
+    def _get_condition_label(self, score: float) -> str:
+        """Return condition label based on score"""
+        if score >= 90:
+            return "EXCELLENT"
+        elif score >= 70:
+            return "GOOD"
+        elif score >= 50:
+            return "POOR"
+        else:
+            return "CRITICAL"
+
+    def _get_score_modifier(self, class_name: str, score: float) -> float:
+        """Get the score modifier for a given class and score"""
+        if class_name in self.CLASS_CONFIG:
+            for r_min, r_max, modifier in self.CLASS_CONFIG[class_name]["ranges"]:
+                if r_min <= score < r_max:
+                    return modifier
+        return 0.0
+
+    def _generate_suggestions(self, predictions: Dict[str, float]) -> Dict[str, Dict]:
+        """Generate suggestions based on prediction scores"""
+        suggestions = {}
+        for class_name, score in predictions.items():
+            if score > 50:  # Threshold for generating a suggestion
+                suggestions[class_name] = {
+                    "suggestion": f"Address the issue related to {class_name}.",
+                    "efficiency_loss": f"{self._get_score_modifier(class_name, score) * 100:.1f}%"
+                }
+        return suggestions
+
 

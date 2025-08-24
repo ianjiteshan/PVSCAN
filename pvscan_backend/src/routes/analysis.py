@@ -13,6 +13,8 @@ from typing import List, Dict
 import logging
 
 from src.models.panel_analysis import PanelAnalysisModel
+from src.utils import allowed_file
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,14 +29,10 @@ def get_model():
     """Get or create model instance"""
     global model_instance
     if model_instance is None:
-        model_dir = os.path.join(current_app.static_folder)
-        model_instance = PanelAnalysisModel(model_dir)
+        model_instance = PanelAnalysisModel()
     return model_instance
 
-def allowed_file(filename: str) -> bool:
-    """Check if file extension is allowed"""
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'zip'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def safe_open_image(file_path: str) -> Image.Image:
     """Safely open an image file"""
@@ -62,16 +60,31 @@ def health_check():
             "error": str(e)
         }), 500
 
-@analysis_bp.route('/analyze-single', methods=['POST'])
+import numpy as np
+
+def convert_to_native_types(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_to_native_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_to_native_types(i) for i in obj]
+    return obj
+
+@analysis_bp.route("/analyze-single", methods=["POST"])
 def analyze_single_image():
     """Analyze a single uploaded image"""
     try:
         # Check if file is present
-        if 'image' not in request.files:
+        if "image" not in request.files:
             return jsonify({"error": "No image file provided"}), 400
         
-        file = request.files['image']
-        if file.filename == '':
+        file = request.files["image"]
+        if file.filename == "":
             return jsonify({"error": "No file selected"}), 400
         
         if not allowed_file(file.filename):
@@ -91,7 +104,10 @@ def analyze_single_image():
             result = model.analyze_image(image)
             
             # Add filename to result
-            result['filename'] = filename
+            result["filename"] = filename
+            
+            # Convert numpy types to native Python types
+            result = convert_to_native_types(result)
             
             return jsonify(result)
             
@@ -154,20 +170,23 @@ def analyze_batch_images():
                     result = model.analyze_image(image)
                     
                     # Add metadata
-                    result['filename'] = filename
-                    result['image_number'] = i + 1
+                    result["filename"] = filename
+                    result["image_number"] = i + 1
                     
-                    if result['success']:
+                    # Convert numpy types to native Python types
+                    result = convert_to_native_types(result)
+                    
+                    if result["success"]:
                         results.append(result)
                     else:
-                        errors.append(f"{filename}: {result.get('error', 'Unknown error')}")
+                        errors.append(f'{filename}: {result.get("error", "Unknown error")}')
                         
                 except Exception as e:
                     errors.append(f"{os.path.basename(image_path)}: {str(e)}")
             
             # Calculate summary statistics
             if results:
-                total_scores = [r['total_score'] for r in results]
+                total_scores = [r["total_score"] for r in results]
                 summary = {
                     "total_images": len(image_files),
                     "successful_analyses": len(results),
@@ -186,6 +205,9 @@ def analyze_batch_images():
                     "max_score": 0
                 }
             
+            # Convert numpy types in summary to native Python types
+            summary = convert_to_native_types(summary)
+
             return jsonify({
                 "success": True,
                 "summary": summary,
@@ -201,34 +223,35 @@ def analyze_batch_images():
         logger.error(f"Error in analyze_batch_images: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
-@analysis_bp.route('/model-info', methods=['GET'])
+@analysis_bp.route("/model-info", methods=["GET"])
 def get_model_info():
     """Get information about loaded models"""
     try:
         model = get_model()
-        return jsonify({
+        info = {
             "available_models": list(model.models.keys()),
             "device": str(model.device),
             "classes": list(model.CLASS_CONFIG.keys())
-        })
+        }
+        return jsonify(convert_to_native_types(info))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@analysis_bp.route('/efficiency-metrics', methods=['POST'])
+@analysis_bp.route("/efficiency-metrics", methods=["POST"])
 def calculate_efficiency_metrics():
     """Calculate efficiency metrics from analysis results"""
     try:
         data = request.get_json()
-        if not data or 'results' not in data:
+        if not data or "results" not in data:
             return jsonify({"error": "No results data provided"}), 400
         
-        results = data['results']
+        results = data["results"]
         if not results:
             return jsonify({"error": "Empty results array"}), 400
         
         # Calculate various efficiency metrics
         total_panels = len(results)
-        panel_scores = [r.get('total_score', 0) for r in results]
+        panel_scores = [r.get("total_score", 0) for r in results]
         
         # Score distribution
         excellent = sum(1 for score in panel_scores if score >= 90)
@@ -248,19 +271,19 @@ def calculate_efficiency_metrics():
         }
         
         for result in results:
-            predictions = result.get('predictions', {})
-            if predictions.get('Physical Damage', 0) > 30:
-                issues['physical_damage'] += 1
-            if predictions.get('Electrical Damage', 0) > 30:
-                issues['electrical_damage'] += 1
-            if predictions.get('Snow Covered', 0) > 30:
-                issues['snow_covered'] += 1
-            if predictions.get('Water Obstruction', 0) > 30:
-                issues['water_obstruction'] += 1
-            if predictions.get('Foreign Particle Contamination', 0) > 30:
-                issues['contamination'] += 1
-            if predictions.get('Bird Interference', 0) > 30:
-                issues['bird_interference'] += 1
+            predictions = result.get("predictions", {})
+            if predictions.get("Physical Damage", 0) > 30:
+                issues["physical_damage"] += 1
+            if predictions.get("Electrical Damage", 0) > 30:
+                issues["electrical_damage"] += 1
+            if predictions.get("Snow Covered", 0) > 30:
+                issues["snow_covered"] += 1
+            if predictions.get("Water Obstruction", 0) > 30:
+                issues["water_obstruction"] += 1
+            if predictions.get("Foreign Particle Contamination", 0) > 30:
+                issues["contamination"] += 1
+            if predictions.get("Bird Interference", 0) > 30:
+                issues["bird_interference"] += 1
         
         metrics = {
             "total_panels": total_panels,
@@ -280,7 +303,7 @@ def calculate_efficiency_metrics():
             "maintenance_priority": _get_maintenance_priority(issues, total_panels)
         }
         
-        return jsonify(metrics)
+        return jsonify(convert_to_native_types(metrics))
         
     except Exception as e:
         logger.error(f"Error calculating efficiency metrics: {e}")
