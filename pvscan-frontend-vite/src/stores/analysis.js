@@ -3,7 +3,7 @@ import axios from 'axios'
 
 
 // filepath: /Users/jitendrajha/Desktop/PVSCAN/pvscan-frontend-vite/src/stores/analysis.js
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://pvscan-h0hd.onrender.com/'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
   
 export const useAnalysisStore = defineStore('analysis', {
   state: () => ({
