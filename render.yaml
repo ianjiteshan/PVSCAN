@@ -10,15 +10,14 @@ services:
       npm run build
 
       # --- Copy Vue build into backend/static ---
-      rm -rf ../pvscan_backend/src/static/*
-      cp -r dist/* ../pvscan_backend/src/static/
+      rm -rf ../src/static/*
+      cp -r dist/* ../src/static/
 
       # --- Install Python deps ---
-      cd ../pvscan_backend
       pip install --upgrade pip
       pip install -r requirements.txt
 
-    startCommand: gunicorn --workers 4 --bind 0.0.0.0:$PORT pvscan_backend.src.main:app
+    startCommand: gunicorn --workers 4 --bind 0.0.0.0:$PORT src.main:app
 
     envVars:
       - key: SECRET_KEY
