@@ -16,6 +16,9 @@ services:
 
       # --- Copy Vite build into backend ---
       cp -r dist/assets ../src/static/
+      cp dist/logo_comp.png ../src/static/
+      cp dist/logo_phone.png ../src/static/
+      cp dist/favicon.ico ../src/static/
       cp dist/index.html ../src/templates/index.html 
 
       # --- Install Python deps ---
