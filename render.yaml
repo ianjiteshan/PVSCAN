@@ -16,7 +16,8 @@ services:
       # --- Install Python deps ---
       cd ../pvscan_backend
       pip install -r requirements.txt
-    startCommand: gunicorn --workers 4 --bind 0.0.0.0:5000 src.main:app
+    startCommand: startCommand: gunicorn --workers 4 --bind 0.0.0.0:$PORT pvscan_backend.src.main:app
+
     envVars:
       - key: SECRET_KEY
         generateValue: true
