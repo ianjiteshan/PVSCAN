@@ -15,7 +15,6 @@ services:
       npm run build
 
       # --- Copy Vite build into backend ---
-      rm -rf ../src/static/*
       cp -r dist/assets ../src/static/
       cp dist/index.html ../src/templates/index.html 
 
