@@ -15,7 +15,11 @@ BASE_DIR = os.path.dirname(__file__)
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(
+    __name__,
+    static_folder="src/static",     # Vue build folder
+    static_url_path="/static"
+)
 
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 
