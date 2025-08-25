@@ -11,7 +11,12 @@ services:
 
       # --- Copy Vue build into backend/static ---
       rm -rf ../src/static/*
-      cp -r dist/* ../src/static/
+      cp -r dist/assets ../src/static/
+      cp dist/*.js ../src/static/
+      cp dist/*.css ../src/static/
+      cp dist/favicon.ico ../src/static/
+      cp dist/index.html ../src/templates/index.html 
+      #--- Copy index.html to templates ---
 
       # --- Install Python deps ---
       cd ..
