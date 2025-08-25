@@ -3,6 +3,11 @@ services:
     name: pvscan
     env: python
     plan: free
+    cache:
+      - name: pip-cache
+        path: /opt/render/project/.pip_cache
+      - name: npm-cache
+        path: pvscan-frontend-vite/node_modules
     buildCommand: |
       # --- Build frontend ---
       cd pvscan-frontend-vite
