@@ -9,18 +9,13 @@ services:
       npm install
       npm run build
 
-      # --- Copy Vue build into backend/static ---
+      # --- Copy Vite build into backend ---
       rm -rf ../src/static/*
       cp -r dist/assets ../src/static/
-      cp dist/*.js ../src/static/
-      cp dist/*.css ../src/static/
-      cp dist/favicon.ico ../src/static/
       cp dist/index.html ../src/templates/index.html 
-      #--- Copy index.html to templates ---
 
       # --- Install Python deps ---
       cd ..
-      pip install --upgrade pip
       pip install -r requirements.txt
 
     startCommand: gunicorn --workers 4 --bind 0.0.0.0:$PORT src.main:app
