@@ -6,8 +6,6 @@ services:
     cache:
       - name: pip-cache
         path: /opt/render/project/.pip_cache
-      - name: npm-cache
-        path: pvscan-frontend-vite/node_modules
     buildCommand: |
       # --- Build frontend ---
       cd pvscan-frontend-vite
@@ -15,14 +13,14 @@ services:
       npm run build
 
       # --- Copy Vite build into backend ---
-      cp -r dist/assets ../src/static/
-      cp dist/logo_comp.png ../src/static/
-      cp dist/logo_phone.png ../src/static/
-      cp dist/favicon.ico ../src/static/
-      cp dist/index.html ../src/templates/index.html 
+      cd ..
+      cp -r pvscan-frontend-vite/dist/assets src/static/
+      cp pvscan-frontend-vite/dist/logo_comp.png src/static/
+      cp pvscan-frontend-vite/dist/logo_phone.png src/static/
+      cp pvscan-frontend-vite/dist/favicon.ico src/static/
+      cp pvscan-frontend-vite/dist/index.html src/templates/
 
       # --- Install Python deps ---
-      cd ..
       pip install -r requirements.txt
 
     startCommand: gunicorn --workers 4 --bind 0.0.0.0:$PORT src.main:app
