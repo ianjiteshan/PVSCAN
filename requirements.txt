@@ -12,19 +12,18 @@ Jinja2==3.1.6
 MarkupSafe==3.0.2
 mpmath==1.3.0
 networkx==3.4.0
-numpy==2.3.2
-pillow==11.3.0
+numpy==1.26.4
+pillow>=10.4.0
 SQLAlchemy==2.0.41
 sympy==1.14.0
 typing_extensions==4.14.0
 Werkzeug==3.1.3
 gunicorn
 
-
 # PyTorch and related — choose CPU by default; CUDA only on Linux
 torch==2.7.1
 torchvision==0.22.1
-triton==3.3.1
+#triton==3.3.1
 
 # NVIDIA CUDA libs — Linux only
 nvidia-cublas-cu12==12.6.4.1; platform_system == "Linux"
@@ -42,3 +41,13 @@ nvidia-nvtx-cu12==12.6.77; platform_system == "Linux"
 
 # Packages that are Linux-only and not available for Windows/Mac — omitted
 # nvidia-cufile-cu12, nvidia-nccl-cu12 → removed
+###
+# Make sure you're in the PVSCAN directory
+#cd /Users/jitendrajha/desktop/pvscan
+
+# Activate virtual environment (if not already activated)
+#source venv/bin/activate
+
+# Set Python path and run
+#PYTHONPATH=/Users/jitendrajha/desktop/pvscan python src/main.py
+###

@@ -1,0 +1,402 @@
+# =====================================
+# PVScan Project .gitignore
+# Python Flask Backend + Vue.js Frontend
+# =====================================
+
+# =====================================
+# Security & Sensitive Data
+# =====================================
+
+
+# Environment files containing secrets
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Logs with potential sensitive data
+*.log
+logs/
+*_log.txt
+access.log
+error.log
+
+# SSL certificates and keys
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# =====================================
+# Python-specific
+# =====================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# =====================================
+# System & IDE files
+# =====================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Visual Studio
+.vs/
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+.builds
+*.pidb
+*.log
+*.svclog
+*.scc
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+*~
+tags
+[._]*.un~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+.org-id-locations
+*_archive
+*_flymake.*
+/eshell/history
+/eshell/lastdir
+/elpa/
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.project
+.externalToolBuilders/
+*.launch
+.pydevproject
+.cproject
+.autotools
+.factorypath
+.buildpath
+.targetpath
+
+# =====================================
+# Build artifacts & Frontend
+# =====================================
+
+# Frontend build outputs
+dist/
+build/
+public/build/
+static/dist/
+static/build/
+
+# Vue.js specific
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vite
+.vite/
+
+# Webpack
+webpack-bundle-analyzer/
+webpack-stats.json
+
+# Compiled assets in static directories
+src/static/assets/
+src/static/js/
+src/static/css/
+src/static/*.js
+src/static/*.css
+
+# Temporary build files
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
+
+# =====================================
+# Other common exclusions
+# =====================================
+
+# Log files
+*.log
+logs/
+*_log.txt
+access.log
+error.log
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Package management
+node_modules/
+package-lock.json.bak
+yarn.lock.bak
+
+# Testing
+.coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Documentation builds
+docs/build/
+docs/.vuepress/dist/
+
+# Backup files
+*.bak
+*.backup
+*.orig
+*.rej
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# =====================================
+# Project-specific exclusions
+# =====================================
+
+# PVScan specific
+# Model files (if they should be excluded)
+# Uncomment if models should not be version controlled:
+# src/models/*.pth
+# src/models/*.h5
+# src/models/*.pkl
+
+# Render deployment
+render-build-*
+
+# Python cache in specific directories
+src/__pycache__/
+src/**/*.pyc
+
+# =====================================
+# Additional recommendations
+# =====================================
+
+# Consider excluding large data files:
+# *.csv
+# *.json (if large datasets)
+# data/
+# datasets/
+
+# API keys and secrets:
+# config/secrets.json
+# config/api_keys.json

@@ -6,7 +6,7 @@
         <div class="hero-text fade-in">
           <h1 class="hero-title">
             Advanced Solar Panel
-            <span class="gradient-text">Inspection & Analysis</span>
+            <span class="gradient-text" data-text="Inspection & Analysis">Inspection & Analysis</span>
           </h1>
           <p class="hero-description">
             Harness the power of AI to detect issues, optimize performance, and maximize efficiency 

@@ -80,7 +80,7 @@
                             transform="rotate(-90 50 50)"/>
                   </svg>
                   <div class="score-text">
-                    <span class="score-number">{{ analysisStore.singleResult.total_score }}</span>
+                    <span class="score-number">{{ formatScore(analysisStore.singleResult.total_score) }}</span>
                     <span class="score-unit">%</span>
                   </div>
                 </div>
@@ -220,23 +220,29 @@ export default {
     }
 
     const formatLabel = (label) => {
-      return label.replace(/([A-Z])/g, ' $1').trim()
-    }
+       return label.replace(/([A-Z])/g, ' $1').trim()
+     }
 
-    return {
-      analysisStore,
-      fileInput,
-      isDragOver,
-      circumference,
-      triggerFileInput,
-      handleFileSelect,
-      handleDrop,
-      startNewAnalysis,
-      getScoreClass,
-      getScoreColor,
-      getPredictionColor,
-      formatLabel
-    }
+     const formatScore = (score) => {
+       if (score === null || score === undefined) return '0.0'
+       return parseFloat(score).toFixed(1)
+     }
+
+     return {
+       analysisStore,
+       fileInput,
+       isDragOver,
+       circumference,
+       triggerFileInput,
+       handleFileSelect,
+       handleDrop,
+       startNewAnalysis,
+       getScoreClass,
+       getScoreColor,
+       getPredictionColor,
+       formatLabel,
+       formatScore
+     }
   }
 }
 </script>

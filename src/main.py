@@ -2,6 +2,10 @@ import os
 import sys
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
+import sys
+import os
+print(f"Current working directory: {os.getcwd()}")
+print(f"sys.path: {sys.path}")
 from src.models.user import db
 from src.routes.user import user_bp
 from src.routes.analysis import analysis_bp
@@ -50,4 +54,4 @@ def serve(path):
         return render_template("index.html")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
