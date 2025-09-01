@@ -1,4 +1,11 @@
 import os
+import logging
+import time
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Starting src.main at {time.time()}")
 import sys
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
