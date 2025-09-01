@@ -4,6 +4,7 @@ import axios from 'axios'
 
 // filepath: /Users/jitendrajha/Desktop/PVSCAN/pvscan-frontend-vite/src/stores/analysis.js
 const API_BASE = __API_BASE_URL__ || 'http://127.0.0.1:5001/'
+console.log('API_BASE:', API_BASE)
   
 export const useAnalysisStore = defineStore('analysis', {
   state: () => ({

@@ -3,6 +3,7 @@
     <div class="nav-container">
       <div class="nav-brand">
         <img src="/logo_comp.png" alt="PVSCAN" class="logo" />
+        <script>console.log('Logo path:', '/logo_comp.png')</script>
         <span class="brand-text">PVSCAN</span>
       </div>
       
